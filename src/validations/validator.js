@@ -28,5 +28,17 @@ const validatePincode = (pincode) => {
     return (/^[1-9][0-9]{5}$/).test(pincode);
 }
 
+const isValidString = function (value) {
+    if (typeof value === "undefined" || value === null) return false;
+    if (typeof value === "string" && value.trim().length === 0) return false;
+    return true;
+};
 
-module.exports = {validateName , validateEmail , validateMobileNo , validatePassword , validatePlace , validatePincode};
+const isValidProductSize = function (size) {
+    const enumArr = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+    if (enumArr.indexOf(size) == -1) return false
+    else return true
+}
+
+
+module.exports = { validateName, validateEmail, validateMobileNo, validatePassword, validatePlace, validatePincode, isValidString , isValidProductSize};

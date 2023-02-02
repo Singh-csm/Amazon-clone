@@ -456,7 +456,7 @@ const login = async function (req, res) {
 
         const check = await userModel.findOne({ email: email });
         if (!check) {
-            return res.status(400).send({ status: false, message: "No such user exist. Please Enter a valid Email and Passowrd." })//status code
+            return res.status(404).send({ status: false, message: "No such user exist. Please Enter a valid Email and Passowrd." })//status code
         }
         const passwordCompare = await bcrypt.compare(password, check.password)
 

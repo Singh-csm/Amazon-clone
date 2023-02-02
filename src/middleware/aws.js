@@ -41,7 +41,7 @@ let uploadfiles = async (req, res, next) => {
 
     } else {
         //console.log(req.files[0])
-        res.status(400).send({ status: false, message: "please enter Image cover." });
+        res.status(400).send({ status: false, message: "please enter Image document." });
     }
 
 }
