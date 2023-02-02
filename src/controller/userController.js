@@ -4,7 +4,7 @@ const { default: mongoose } = require("mongoose");
 
 const userModel = require("../models/userModel");
 const { validateName, validateEmail, validateMobileNo, validatePassword, validatePlace, validatePincode } = require("../validations/validator");
-
+const {uploadFile}=require("../middleware/aws");
 
 //==========Router handler for user registration===============
 const registerUser = async function (req, res) {
@@ -290,7 +290,14 @@ const updateUsers = async (req, res) => {
         }
 
         if (profileImage) {
-            data.profileImage = req.profileImage;
+            let files = req.files
+            if (files && files.length > 0) {
+                let uploadFileURL = await uploadFile(files[0])
+                data.profileImage = uploadFileURL
+                
+            } else {
+                return res.status(400).send({ status: false, message: "No file found" })
+            }
         }
 
         if (address) {
@@ -311,10 +318,6 @@ const updateUsers = async (req, res) => {
                         return res.status(400).send({ status: false, message: "Street must be in string" });
 
                     }
-                    //console.log(isUserId)
-
-
-
                 }
                 if (shipping.city) {
                     if (shipping.city && typeof shipping.city != "string") {
@@ -366,9 +369,8 @@ const updateUsers = async (req, res) => {
             }
 
             let a = isUserId.address
-
-
         }
+        if(address){
         let { shipping, billing } = isUserId.address
         let arr = Object.keys(address)
         arr.forEach((u) => {
@@ -393,8 +395,10 @@ const updateUsers = async (req, res) => {
 
             }
         })
+    
         address.shipping = shipping
         address.billing = billing
+    }
         if (address) {
             data["address"] = address
         }

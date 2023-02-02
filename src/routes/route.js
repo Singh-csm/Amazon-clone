@@ -7,6 +7,6 @@ const { isAuthentication } = require("../middleware/commonMiddleware");
 router.post("/register", uploadfiles, registerUser);
 router.get('/user/:userId/profile', isAuthentication, getUser);
 router.post("/login", login);
-router.put('/user/:userId/profile', uploadfiles, isAuthentication, updateUsers);
+router.put('/user/:userId/profile', isAuthentication, updateUsers);
 
 module.exports = router

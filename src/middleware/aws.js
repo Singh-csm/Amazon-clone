@@ -46,4 +46,4 @@ let uploadfiles = async (req, res, next) => {
 
 }
 
-module.exports = { uploadfiles }
+module.exports = { uploadfiles , uploadFile }
