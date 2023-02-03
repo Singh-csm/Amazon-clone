@@ -76,13 +76,13 @@ let createProduct = async function (req, res) {
         
         let arr1 = ["S", "XS","M","X", "L","XXL", "XL"];
         let empArr =[];
-        if(availableSizes.length != 0){
-            let availableSize = availableSizes.split(",");
-            availableSize.forEach((x)=>{
-                if(x!=undefined && !arr1.includes(x)){
-                    empArr.push(x);
+        if(availableSizes.length != 0){//string
+            let availableSize = availableSizes.split(",");//array
+            availableSize.forEach((x)=>{//going in its values
+                if( !arr1.includes(x)){//availablesize=
+                    empArr.push(x);//
                 }
-               
+               //1ST S check [arr1]==1 or [arr1]==0
             })
             if(empArr.length>0){
                 return res.status(400).send({ status: false, message: "availableSizes can only be S, XS, M, X, L, XXL, XL " })

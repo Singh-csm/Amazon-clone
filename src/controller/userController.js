@@ -309,7 +309,7 @@ const updateUsers = async (req, res) => {
             let { shipping, billing } = address;
 
             //====validations for shipping address====
-            if (shipping) {
+            if (shipping!=undefined) {
                 if (shipping && typeof shipping != "object") {
                     return res.status(400).send({ status: false, message: "Shipping Address must be in Object Form." });
                 }
@@ -368,19 +368,20 @@ const updateUsers = async (req, res) => {
                 }
             }
 
-            let a = isUserId.address
+            //let a = isUserId.address
         }
-        if(address){
-        let { shipping, billing } = isUserId.address
-        let arr = Object.keys(address)
-        arr.forEach((u) => {
+        if(address){//from data in req body
+        let { shipping, billing } = isUserId.address//from db= shipping:{....},billing:{...}
+        let arr = Object.keys(address)//["shipping","Billing"]
+        arr.forEach((u) => {//=>u = billing or u = shipping
             if (u == "shipping" || u == "billing") {
                 if (u == "shipping" && address[u] != undefined) {
-                    let Arr = ["street", "city", "pincode"]
+                    let Arr = ["street", "city", "pincode"]//=>Arr[0]==street
                     for (let i = 0; i < 3; i++) {
-                        if (address[u][Arr[i]] != undefined) {
-                            shipping[Arr[i]] = address[u][Arr[i]]
-                        }
+                        if (address[u][Arr[i]] != undefined) {//address[shipping][street]
+                            shipping[Arr[i]] = address[u][Arr[i]]//shipping[street]=address[shipping][street]
+                        }                                          //shipping is from db 
+                                                                 //address is from body
                     }
                 }
                 if (u == "billing" && address[u] != undefined) {
@@ -403,14 +404,14 @@ const updateUsers = async (req, res) => {
             data["address"] = address
         }
 
-        let reqArr = ["fname", "lname", "email", "password", "phone", "profileImage", "address"]
-        let resArr = Object.keys(data)
-        let count = 0
-        resArr.forEach((y) => {
-            if (!reqArr.includes(y)) {
-                count++
-            }
-        })
+        // let reqArr = ["fname", "lname", "email", "password", "phone", "profileImage", "address"]
+        // let resArr = Object.keys(data)
+        // let count = 0
+        // resArr.forEach((y) => {
+        //     if (!reqArr.includes(y)) {
+        //         count++
+        //     }
+        // })
         // if(count>0){
         //     return res.status(400).send({ status: false, message: "please check your attributes..." });
         // }
