@@ -138,6 +138,20 @@ const getProducts = async function (req, res) {
         }
         //doing db call with the obj 
         obj["isDeleted"] = { $eq: false }
+
+        let queryArr=Object.keys(data)
+        let referenceArr=["size","name","priceGreaterThan","priceLessThan","priceSort"]
+        let count=0
+        queryArr.forEach((x)=>{
+            console.log(x.includes(referenceArr))
+            if(!referenceArr.includes(x)){
+                count++
+            }
+        })
+        if(count>0){
+            return res.status(400).send({status:false,message:"please enter vaild filters to fetch data....."})
+        }
+
         let products = await productModel.find(obj)
 
         //by doing bd call bring the documents according to filter and then sort
