@@ -44,14 +44,6 @@ let createProduct = async function (req, res) {
         if (isNaN(Price)) { return res.status(400).send({ status: false, message: "Invalid Price entry, Price should be a number." }) }
         if (Price < 0) { return res.status(400).send({ status: false, message: "Price must be positive Integer." }) }
 
-
-        // if (!Number(price)) { return res.status(400).send({ status: false, message: "Invalid price entry, price should be a number." }) }
-
-        //if(typeof price != Number ){return res.status(400).send({ status:false, message: "Invalid price entry, price should be a number."})}
-        //if(!validatePrice(price)){ return res.status(400).send({ status: false, message: "price is mandatory."}) }
-        //price = JSON.parse(price)
-        // console.log(typeof price);
-
         if (!currencyId) return res.status(400).send({ status: false, message: "currencyId is required." })
         if (currencyId != "INR") { return res.status(400).send({ status: false, message: "Invalid currencyId, currencyId should be INR only" }) }
 
@@ -62,44 +54,48 @@ let createProduct = async function (req, res) {
             if (!isFreeShipping) return res.status(400).send({ status: false, message: "isFreeShipping is mandatory." })
             if (isFreeShipping != "true" && isFreeShipping != "false") return res.status(400).send({ status: false, message: "isFreeShipping should be Boolean value." })
         }
-        // if(isFreeShipping = JSON.parse(isFreeShipping) ) 
-        //if(!Boolean(isFreeShipping)) { return res.status(400).send({ status:false, message: "isFreeShipping should be Boolean value." }) }
-        //if(isFreeShipping != "boolean"){ return res.status(400).send({ status:false, message: "isFreeShipping should be Boolean value."}) }
-        // console.log(typeof isFreeShipping);
-        //if(typeof isFreeShipping != "boolean" ){return res.status(400).send({ status:false, message: "Invalid isFreeShipping entry, isFreeShipping should be a number."})}
-        // if(installments){ installments=JSON.parse(installments) }
-        // if(isFreeShipping) {isFreeShipping = JSON.parse(isFreeShipping)}
 
         if (installments) {
-            if (!installments) return res.status(400).send({ status: false, message: "installments is mandatory." })
+            if (!installments) {
+                return res.status(400).send({ status: false, message: "installments is mandatory." });
+            }
             let Installments = Number(installments)
-            if (isNaN(Installments)) { return res.status(400).send({ status: false, message: "Invalid installments entry, installments should be a number." }) }
-            if (Installments < 0) { return res.status(400).send({ status: false, message: "installments must be positive Integer." }) }
+            if (isNaN(Installments)) { 
+                return res.status(400).send({ status: false, message: "Invalid installments entry, installments should be a number." });
+            }
+            if (Installments < 0) { 
+                return res.status(400).send({ status: false, message: "installments must be positive Integer." });
+            }
         }
-
-        //if (!Number(installments)) { return res.status(400).send({ status: false, message: "Invalid installments entry, installments should be a number." }) }
 
         if (style) {
-            if (!isValidString(style)) { return res.status(400).send({ status: false, message: "Invalid style input,style must be string." }) }
+            if (!isValidString(style)) { 
+                return res.status(400).send({ status: false, message: "Invalid style input,style must be string." });
+            }
         }
-        if (!isValidProductSize(availableSizes)) { return res.status(400).send({ status: false, message: "availableSizes can only be S, XS, M, X, L, XXL, XL " }) }
-        // let arr1 =["S", "XS","M","X", "L","XXL", "XL"]
-        // if( availableSizes.length>0 ){
-        //     if((!arr1.includes(...availableSizes))) return res.status(400).send({ status:false, message: "availableSizes can only be S, XS, M, X, L, XXL, XL "})
-        // }
+        
+        let arr1 = ["S", "XS","M","X", "L","XXL", "XL"];
+        let empArr =[];
+        if(availableSizes.length != 0){
+            let availableSize = availableSizes.split(",");
+            availableSize.forEach((x)=>{
+                if(x!=undefined && !arr1.includes(x)){
+                    empArr.push(x);
+                }
+               
+            })
+            if(empArr.length>0){
+                return res.status(400).send({ status: false, message: "availableSizes can only be S, XS, M, X, L, XXL, XL " })
+            }
+        }
 
-        // const Check_Title = await productModel.findOne({title: title})
-        // if(Check_Title){ return res.status(400).send({status : false, message : "title already exists. Please enter unique title."}) }
-
-        //if( data.isFreeShipping != "true" || data.isFreeShipping != "false" ) { console.log(data.isFreeShipping); return res.status(400).send({status:false, message: "please enter true/false"}) }
-        // if(data.isFreeShipping== true){
-        //     //data.isFreeShipping = Boolean(1)
-        // }
-        // if(data.isFreeShipping == "false") { data.isFreeShipping = undefined }
         data.productImage = req.profileImage;
+        data.availableSizes = availableSizes.split(",");
         let create_Data = await productModel.create(data);
 
-        if (!create_Data) { return res.status(400).send({ status: false, message: "Data could not be created." }) }
+        if (!create_Data) { 
+            return res.status(400).send({ status: false, message: "Data could not be created." });
+        }
 
         return res.status(201).send({ status: true, message: "Success", data: create_Data })
 
@@ -204,14 +200,17 @@ const deleteProductById = async function (req, res) {
             return res.status(400).send({ status: false, message: "Product Id is invalid , please enter a valid ID." });
         }
 
+        const checkProduct = await productModel.findOne({_id:productId , isDeleted:false});
+        
+        if (!checkProduct) {
+            return res.status(404).send({ status: false, message: "Data not found for deletion or it already deleted." });
+        }
+
         const deletedProduct = await productModel.findOneAndUpdate(
             { _id: productId, isDeleted: false },
             { isDeleted: false, deletedAt: Date.now() }
         );
 
-        if (!deletedProduct) {
-            return res.status(400).send({ status: false, message: "Data not found for deletion or it already deleted." });
-        }
 
         res.status(200).send({ status: true, message: "Product deleted successfully." });
     } catch (err) {
