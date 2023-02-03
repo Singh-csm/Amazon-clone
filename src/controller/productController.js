@@ -121,7 +121,7 @@ const getProducts = async function (req, res) {
         let { name, size, priceGreaterThan, priceLessThan, priceSort } = data;
         let obj = {}
         if (name) {
-            name = name.toLowercase();
+            name = name.toLowerCase();
             obj["title"] = { $regex: name }
 
         }
