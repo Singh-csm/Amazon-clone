@@ -35,7 +35,7 @@ let uploadfiles = async (req, res, next) => {
     let files = req.files
     if (req.files && req.files.length > 0) {
         let x = await uploadFile(files[0])
-        console.log(x)
+        // console.log(x)
         req.profileImage = x
         next()
 

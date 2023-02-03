@@ -289,15 +289,13 @@ const updateUsers = async (req, res) => {
             data.password = hashing;
         }
 
-        if (profileImage) {
-            let files = req.files
-            if (files && files.length > 0) {
-                let uploadFileURL = await uploadFile(files[0])
-                data.profileImage = uploadFileURL
-                
-            } else {
-                return res.status(400).send({ status: false, message: "No file found" })
-            }
+        let files = req.files
+
+        if ((files) && (files.length > 0)) {
+
+            let uploadFileURL = await uploadFile(files[0])
+            data.profileImage = uploadFileURL
+
         }
 
         if (address) {

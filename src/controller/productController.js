@@ -1,6 +1,7 @@
 const { isValidObjectId } = require("mongoose");
 const productModel = require("../models/productModel");
 const { isValidString, isValidProductSize } = require("../validations/validator");
+const { uploadFile } = require("../middleware/aws")
 
 
 let createProduct = async function (req, res) {
@@ -14,7 +15,7 @@ let createProduct = async function (req, res) {
 
         //if keys were undefined then in case:
         let dataInBody = Object.keys(data);
-        let arr = ["title", "description", "price", "currencyId", "currencyFormat", "isFreeShipping", "style", "availableSizes", "installments", "productImage"];
+        let arr = ["title", "description", "price", "currencyId", "currencyFormat", "uploadFile", "isFreeShipping", "style", "availableSizes", "installments", "productImage"];
 
         for (let i = 0; i < dataInBody.length; i++) {
             const someThing = dataInBody[i];
@@ -23,7 +24,7 @@ let createProduct = async function (req, res) {
             }
         }
 
-        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = data;
+        let { title, description, price, currencyId, currencyFormat, uploadFile, isFreeShipping, style, availableSizes, installments } = data;
 
         //validation ...
         if (!title) return res.status(400).send({ status: false, message: "title is mandatory." })
@@ -60,40 +61,43 @@ let createProduct = async function (req, res) {
                 return res.status(400).send({ status: false, message: "installments is mandatory." });
             }
             let Installments = Number(installments)
-            if (isNaN(Installments)) { 
+            if (isNaN(Installments)) {
                 return res.status(400).send({ status: false, message: "Invalid installments entry, installments should be a number." });
             }
-            if (Installments < 0) { 
+            if (Installments < 0) {
                 return res.status(400).send({ status: false, message: "installments must be positive Integer." });
             }
         }
 
         if (style) {
-            if (!isValidString(style)) { 
+            if (!isValidString(style)) {
                 return res.status(400).send({ status: false, message: "Invalid style input,style must be string." });
             }
         }
-        
-        let arr1 = ["S", "XS","M","X", "L","XXL", "XL"];
-        let empArr =[];
-        if(availableSizes.length != 0){//string
+
+        let arr1 = ["S", "XS", "M", "X", "L", "XXL", "XL"];
+        let empArr = [];
+        if (availableSizes.length != 0) {//string
             let availableSize = availableSizes.split(",");//array
-            availableSize.forEach((x)=>{//going in its values
-                if( !arr1.includes(x)){//availablesize=
+            availableSize.forEach((x) => {//going in its values
+                if (!arr1.includes(x)) {//availablesize=
                     empArr.push(x);//
+
                 }
-               //1ST S check [arr1]==1 or [arr1]==0
+                //1ST S check [arr1]==1 or [arr1]==0
             })
-            if(empArr.length>0){
+            if (empArr.length > 0) {
                 return res.status(400).send({ status: false, message: "availableSizes can only be S, XS, M, X, L, XXL, XL " })
             }
         }
 
         data.productImage = req.profileImage;
+        // availableSizes = availableSizes.trim()
         data.availableSizes = availableSizes.split(",");
+        // data.availableSizes = availableSizes.split(',').map((x) => x.trim())
         let create_Data = await productModel.create(data);
 
-        if (!create_Data) { 
+        if (!create_Data) {
             return res.status(400).send({ status: false, message: "Data could not be created." });
         }
 
@@ -117,7 +121,7 @@ const getProducts = async function (req, res) {
         let { name, size, priceGreaterThan, priceLessThan, priceSort } = data;
         let obj = {}
         if (name) {
-            name = name.toLowercase()
+            name = name.toLowercase();
             obj["title"] = { $regex: name }
 
         }
@@ -132,52 +136,52 @@ const getProducts = async function (req, res) {
             obj["price"] = { $gt: priceGreaterThan, $lt: priceLessThan }
         }
         if (size) {
-            size = size.toUpperCase()
-            if (!isValidProductSize(size)) return res.status(400).send({ status: false, message: "Please enter valid size" })
+            size = size.toUpperCase();
+            if (!isValidProductSize(size)) return res.status(400).send({ status: false, message: "Please enter valid size" });
             obj["availableSizes"] = { $in: size }
         }
         //doing db call with the obj 
         obj["isDeleted"] = { $eq: false }
 
-        let queryArr=Object.keys(data)
-        let referenceArr=["size","name","priceGreaterThan","priceLessThan","priceSort"]
-        let count=0
-        queryArr.forEach((x)=>{
+        let queryArr = Object.keys(data)
+        let referenceArr = ["size", "name", "priceGreaterThan", "priceLessThan", "priceSort"]
+        let count = 0;
+        queryArr.forEach((x) => {
             console.log(x.includes(referenceArr))
-            if(!referenceArr.includes(x)){
-                count++
+            if (!referenceArr.includes(x)) {
+                count++;
             }
         })
-        if(count>0){
-            return res.status(400).send({status:false,message:"please enter vaild filters to fetch data....."})
+        if (count > 0) {
+            return res.status(400).send({ status: false, message: "please enter vaild filters to fetch data....." });
         }
 
-        let products = await productModel.find(obj)
+        let products = await productModel.find(obj);
 
         //by doing bd call bring the documents according to filter and then sort
         if (!priceSort) priceSort = 1 // if sort is not given then  am sorting in asc order
         if (priceSort == 1) {
-            products.sort((x, y) => x.price - y.price)
+            products.sort((x, y) => x.price - y.price);
         }
         else if (priceSort == -1) {
-            products.sort((x, y) => y.price - x.price)
+            products.sort((x, y) => y.price - x.price);
         }
         else {
-            return res.status(400).send({ status: false, message: "price sort can be 1 or -1 only" })
+            return res.status(400).send({ status: false, message: "price sort can be 1 or -1 only" });
 
         }
         if (products.length == 0) {
-            return res.status(404).send({ status: false, message: "no products found" })
+            return res.status(404).send({ status: false, message: "no products found" });
         }
         else {
-            return res.status(200).send({ status: false, message: "products details", data: products })
+            return res.status(200).send({ status: false, message: "products details", data: products });
         }
     } catch (error) {
-        res.status(500).send({ status: false, message: error.message })
-
+        res.status(500).send({ status: false, message: error.message });
     }
-
 }
+
+
 
 const fetchProductsById = async function (req, res) {
     try {
@@ -203,6 +207,141 @@ const fetchProductsById = async function (req, res) {
 }
 
 
+const updateProducts = async function (req, res) {
+    try {
+        let data = req.body;
+
+        let productId = req.params.productId;
+
+        let queryArr = Object.keys(data);
+        if (queryArr.length == 0) {
+            return res.status(400).send({ status: false, message: "Please enter something to update" });
+        }
+
+        let referenceArr = ["title", "description", "price", "isFreeShipping", "currencyFormat", "currencyId", "style", "availableSizes", "installments", "productImage"];
+        let count = 0;
+        queryArr.forEach((x) => {
+            if (!referenceArr.includes(x)) {
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            return res.status(400).send({ status: false, message: "please enter vaild filters to fetch data....." });
+        }
+
+        let { title, description, price, isFreeShipping, style, productImage, currencyId, currencyFormat, availableSizes, installments } = data;
+
+        //validation ...
+        if (title) {
+            if (!isValidString(title)) {
+                return res.status(400).send({ status: false, message: "Enter valid title." });
+            }
+            title = title.toLowerCase();
+            const Check_Title = await productModel.findOne({ title: title });
+            if (Check_Title) {
+                return res.status(404).send({ status: false, message: "title already exists. Please enter unique title." });
+            }
+        }
+
+        if (description) {
+            if (!isValidString(description)) {
+                return res.status(400).send({ status: false, message: "Enter some description.." });
+            }
+        }
+
+        if (price) {
+            let Price = Number(price);
+            if (isNaN(Price)) {
+                return res.status(400).send({ status: false, message: "Invalid Price entry, Price should be a number." });
+            }
+            if (Price < 0) {
+                return res.status(400).send({ status: false, message: "Price must be positive Integer." });
+            }
+        }
+
+        if (currencyId) {
+            if (currencyId != "INR") {
+                return res.status(400).send({ status: false, message: "Invalid currencyId, currencyId should be INR only" });
+            }
+        }
+
+        if (currencyFormat) {
+            if (currencyFormat != "₹") {
+                return res.status(400).send({ status: false, message: "Invalid currencyFormat, currencyFormat should be ₹ only." });
+            }
+        }
+
+        if (isFreeShipping) {
+            if (isFreeShipping != "true" && isFreeShipping != "false") {
+                return res.status(400).send({ status: false, message: "isFreeShipping should be Boolean value." });
+            }
+        }
+
+        if (installments) {
+            let Installments = Number(installments)
+            if (isNaN(Installments)) {
+                return res.status(400).send({ status: false, message: "Invalid installments entry, installments should be a number." });
+            }
+            if (Installments < 0) {
+                return res.status(400).send({ status: false, message: "installments must be positive Integer." });
+            }
+        }
+
+        if (availableSizes) {
+            let arr1 = ["S", "XS", "M", "X", "L", "XXL", "XL"];
+            let empArr = [];
+            if (availableSizes.length > 0) {//string
+                let availableSize = availableSizes.split(",");//array
+                availableSize.forEach((x) => {//going in its values
+                    if ((x == undefined) || (!arr1.includes(x))) {//availablesize=
+                        empArr.push(x);//
+
+                    }
+                    //1ST S check [arr1]==1 or [arr1]==0 
+                })
+                if (empArr.length > 0) {
+                    return res.status(400).send({ status: false, message: "availableSizes can only be S, XS, M, X, L, XXL, XL " });
+                }
+            }
+            data.availableSizes = availableSizes.split(',');
+        }
+
+
+        let files = req.files;
+        if ((files) && (files.length > 0)) {
+            let uploadFileURL = await uploadFile(files[0]);
+            data.productImage = uploadFileURL;
+        }
+
+        let a = [];
+        queryArr.forEach((y) => {
+            if (data[y] == "") {
+                a.push(y);
+            }
+        })
+        if (a.length > 0) {
+            return res.status(400).send({ status: false, message: `${a[0]} can't be empty` });
+        }
+
+        let updateProduct = await productModel.findOneAndUpdate(
+            { isDeleted: false, _id: productId },
+            data,
+            { new: true }
+        );
+
+        if (!updateProduct) {
+            return res.status(404).send({ status: false, message: "Product is not found or Already Deleted!" });
+        }
+
+        return res.status(200).send({ status: true, message: "Success", data: updateProduct });
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error.message });
+    }
+}
+
+
+
 const deleteProductById = async function (req, res) {
     try {
         let productId = req.params.productId;
@@ -214,8 +353,8 @@ const deleteProductById = async function (req, res) {
             return res.status(400).send({ status: false, message: "Product Id is invalid , please enter a valid ID." });
         }
 
-        const checkProduct = await productModel.findOne({_id:productId , isDeleted:false});
-        
+        const checkProduct = await productModel.findOne({ _id: productId, isDeleted: false });
+
         if (!checkProduct) {
             return res.status(404).send({ status: false, message: "Data not found for deletion or it already deleted." });
         }
@@ -233,4 +372,4 @@ const deleteProductById = async function (req, res) {
 }
 
 
-module.exports = { createProduct, getProducts, fetchProductsById, deleteProductById };
+module.exports = { createProduct, getProducts, fetchProductsById, updateProducts, deleteProductById };
