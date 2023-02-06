@@ -361,7 +361,7 @@ const deleteProductById = async function (req, res) {
 
         const deletedProduct = await productModel.findOneAndUpdate(
             { _id: productId, isDeleted: false },
-            { isDeleted: false, deletedAt: Date.now() }
+            { isDeleted: true, deletedAt: Date.now() }
         );
 
 
