@@ -40,5 +40,8 @@ const isValidProductSize = function (size) {
     else return true
 }
 
+const isValidNum = function (value) {
+    return /[0-9]/
+}
 
-module.exports = { validateName, validateEmail, validateMobileNo, validatePassword, validatePlace, validatePincode, isValidString , isValidProductSize};
+module.exports = { validateName, validateEmail, validateMobileNo, validatePassword, validatePlace, validatePincode, isValidString, isValidProductSize, isValidNum };
