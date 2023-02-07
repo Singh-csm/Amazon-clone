@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 //======================================= Name Regex Validation ========================================//
 const validateName = (name) => {
     return (/^(?=.{1,50}$)[a-z]+(?:['_.\s][a-z]+)*$/i.test(name));
@@ -44,4 +46,16 @@ const isValidNum = function (value) {
     return /[0-9]/
 }
 
-module.exports = { validateName, validateEmail, validateMobileNo, validatePassword, validatePlace, validatePincode, isValidString, isValidProductSize, isValidNum };
+const isIdValid = function (value) {
+    return mongoose.Types.ObjectId.isValid(value); 
+};
+
+const valid=function(value){
+    if(typeof value=="number" || typeof value==null || typeof value==undefined)     
+    return false
+    if(typeof value=="string" && value.trim().length==0)
+    return false
+    return true
+}
+
+module.exports = { validateName, validateEmail, validateMobileNo, validatePassword, validatePlace, validatePincode, isValidString, isValidProductSize, isValidNum,isIdValid,valid };

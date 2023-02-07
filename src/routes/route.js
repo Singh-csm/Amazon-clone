@@ -20,9 +20,9 @@ router.get("/products/:productId", fetchProductsById);
 router.put("/products/:productId", updateProducts);
 router.delete("/products/:productId", deleteProductById);
 //======APIs for Cart========
-router.post('/users/:userId/cart', createCart);
-router.get("/users/:userId/cart", getCartDetails);
-router.put("/users/:userId/cart", updatecart);
-router.delete("/users/:userId/cart", deleteCart);
+router.post('/users/:userId/cart', isAuthentication, createCart);
+router.get("/users/:userId/cart", isAuthentication, getCartDetails);
+router.put("/users/:userId/cart", isAuthentication, updatecart);
+router.delete("/users/:userId/cart", isAuthentication, deleteCart);
 
 module.exports = router
