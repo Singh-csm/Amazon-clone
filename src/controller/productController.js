@@ -9,9 +9,10 @@ let createProduct = async function (req, res) {
     try {
 
         let data = req.body;
-        if (Object.keys(data).length == 0) {
-            return res.status(400).send({ status: false, message: "Request body doesn't be Empty!" });
-        }
+
+        // if (Object.keys(data).length == 0 ) {
+        //     return res.status(400).send({ status: false, message: "Request body can't be Empty!" });  //check whether you middleware is not ?
+        // }
 
         //if keys were undefined then in case:
         let dataInBody = Object.keys(data);
@@ -23,6 +24,8 @@ let createProduct = async function (req, res) {
                 return res.status(400).send({ status: false, message: `${someThing} is not a valid Property.` });
             }
         }
+
+
 
         let { title, description, price, currencyId, currencyFormat, uploadFile, isFreeShipping, style, availableSizes, installments } = data;
 

@@ -16,6 +16,10 @@ mongoose.connect("mongodb+srv://Tapaswee2001Samantaray:jecky2001@cluster0.zinuff
 
 app.use("/", route);
 
+app.use("/*", (req, res)=>{
+ return res.status(400).send({status: false, message: "Invalid Path"})
+})
+
 let port = process.env.PORT || 3000;
 app.listen(port, function () {
     console.log("Express app is running on port " + port);

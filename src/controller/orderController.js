@@ -6,7 +6,7 @@ const userModel = require("../models/userModel");
 
 
 const placeOrder = async function (req, res) {
-    // try {
+     try {
     let userId = req.params.userId;
     let body = req.body;
     let { cartId } = body;
@@ -19,9 +19,9 @@ const placeOrder = async function (req, res) {
         return res.status(400).send({ status: false, message: "User doesn't exists with this User ID." });
     }
 
-    // if (userId != req.token) {
-    //     return res.status(403).send({ status: false, message: "you are not authorized to perform any action over this order..." })
-    // }
+    if (userId != req.token) {
+        return res.status(403).send({ status: false, message: "you are not authorized to perform any action over this order..." })
+    }
 
     if (Object.keys(body).length == 0) {
         return res.status(400).send({ status: false, message: "Request body can not be empty." });
@@ -53,25 +53,25 @@ const placeOrder = async function (req, res) {
         totalItems: checkCart.totalItems,
         totalQuantity: totalQuantity
     }
-    if (body.status == "cancled") {
+    
         await cartModel.findOneAndUpdate(
             { userId: userId },
-            { $set: { items: [], totalItems: 0, totalPrice: 0 } }
+            { $set: { items: [], totalItems: 0, totalPrice: 0 }} ,{new:true}
         );
        
-        orderDetails.isDeleted=true
-        orderDetails.deletedAt=Date.now()
-        let createOrder = await orderModel.create(orderDetails);
+        // orderDetails.isDeleted=true
+        // orderDetails.deletedAt=Date.now()
+        // let createOrder = await orderModel.create(orderDetails);
        
-        return res.status(201).send({ status: true, message: "order canceled successfully ", data: createOrder });
-    }
+        // return res.status(201).send({ status: true, message: "order canceled successfully ", data: createOrder });
+    
     let createOrder = await orderModel.create(orderDetails);
     createOrder = createOrder._doc;
     delete createOrder.isDeleted;
     return res.status(201).send({ status: true, message: "Success", data: createOrder });
-    // } catch (err) {
-    //     return res.status(500).send({ status: false, message: err.message });
-    // }
+    } catch (err) {
+        return res.status(500).send({ status: false, message: err.message });
+    }
 }
 
 
@@ -99,9 +99,9 @@ const updatedOrder = async (req, res) => {
         } if (!(isValidObjectId(userId))) {
             return res.status(400).send({ status: false, message: "please provide valid user Id...." })
         }
-        // if(userId!=req.token){
-        //     return res.status(403).send({status:false,message:"you are not authorized to perform any action over this order..."})
-        // }
+        if(userId!=req.token){
+            return res.status(403).send({status:false,message:"you are not authorized to perform any action over this order..."})
+        }
 
         let isUserExist = await userModel.findOne({ _id: userId })
         if (!isUserExist) {
@@ -120,11 +120,11 @@ const updatedOrder = async (req, res) => {
         if (!data.status) {
             return res.status(404).send({ status: false, message: "please provide status in order to update your order..." })
         }
-        let statusArr = ["pending", "completed", "cancled"]
+        let statusArr = ["pending", "completed", "canceled"]
         if (!statusArr.includes(data.status)) {
             return res.status(404).send({ status: false, message: "please provide valid status in order to update your order..." })
         }
-        if (data.status == "cancled") {
+        if (data.status == "canceled") {
             if (isorderExist.cancellable == false) {
                 return res.status(400).send({ status: false, message: "Sorry this order cannot be cancelled....." })
             }
@@ -136,7 +136,7 @@ const updatedOrder = async (req, res) => {
 
             let updatedOrder = await orderModel.findOneAndUpdate(
                 { _id: orderId, userId: userId, isDeleted: false },
-                { isDeleted: true, deletedAt: Date.now(), status: data.status,items: [], totalItems: 0, totalPrice: 0 },
+                { isDeleted: true, deletedAt: Date.now(), status: data.status,items: [], totalItems: 0, totalPrice: 0, totalQuantity:0 },
                 { new: true }
             ).select({ __v: 0 });
 

@@ -7,171 +7,387 @@ const { validateName, validateEmail, validateMobileNo, validatePassword, validat
 const {uploadFile}=require("../middleware/aws");
 
 //==========Router handler for user registration===============
+// const registerUser = async function (req, res) {
+//     //try {
+//         let body = req.body;
+
+//         if (body.address) {
+//           if(body.address[0]!='{'){
+//               return res.status(400).send({ status: false, message: "Address must be in Object Form." });
+//           }
+//           body.address = JSON.parse(body.address);
+//       }
+
+//       //   if (body.address) {
+//       //     let count=0
+//       //     let z=body.address.split('')
+//       //     let a=[]                                      ///we will do it on priority basis
+//       //    z.forEach((x)=>{
+//       //     if(x!=undefined || x.trim()!=""){
+//       //       a.push(x.trim())
+//       //     }
+//       //    })
+//       //    console.log(a)
+//       //    if(!a.includes(":")){
+//       //     return res.status(400).send({ status: false, message: "Address must be in Object Form ." });
+//       //    }
+//       //     if(a[0]=="{" && (a[1]=='"' || a[1]=="'") && a[a.length-1]=='}'){
+//       //      count++
+//       //     }else{
+//       //       return res.status(400).send({ status: false, message: "Address must be in Object Form ." });
+//       //     }
+//       // }
+
+//         let { fname, lname, email, phone, password, address, profileImage } = body;
+
+//         if (Object.keys(body).length == 0) {
+//             return res.status(400).send({ status: false, message: "Request body can't be empty." });
+//         }
+
+//         //====validations for First name====
+//         if (fname && typeof fname != "string") {
+//             return res.status(400).send({ status: false, message: "First name must be in string" });
+//         }
+//         if (!fname || !fname.trim()) {
+//             return res.status(400).send({ status: false, message: "First name is required." });
+//         }
+//         if (!validateName(fname.trim())) {
+//             return res.status(400).send({ status: false, message: "Enter a valid First name" });
+//         }
+
+//         //====validations for last name====
+//         if (lname && typeof lname != "string") {
+//             return res.status(400).send({ status: false, message: "Last name must be in string" });
+//         }
+//         if (!lname || !lname.trim()) {
+//             return res.status(400).send({ status: false, message: "Last name is required." });
+//         }
+//         if (!validateName(lname.trim())) {
+//             return res.status(400).send({ status: false, message: "Enter a valid Last name." });
+//         }
+
+//         //====validations for Email====
+//         if (email && typeof email != "string") {
+//             return res.status(400).send({ status: false, message: "Email must be in String." });
+//         }
+//         if (!email || !email.trim()) {
+//             return res.status(400).send({ status: false, message: "Email is required." });
+//         }
+//         if (!validateEmail(email.trim())) {
+//             return res.status(400).send({ status: false, message: "Enter a valid Email." });
+//         }
+//         const existEmail = await userModel.findOne({ email: email });
+//         if (existEmail) {
+//             return res.status(400).send({ status: false, message: "This Email is already in use, try with another one." });
+//         }
+
+//         //====validations for Phone====
+//         if (phone && typeof phone != "string") {
+//             return res.status(400).send({ status: false, message: "phone number must be in String." });
+//         }
+//         if (!phone || !phone.trim()) {
+//             return res.status(400).send({ status: false, message: "phone number is required." });
+//         }
+//         if (!validateMobileNo(phone.trim())) {
+//             return res.status(400).send({ status: false, message: "Enter a valid phone Number." });
+//         }
+//         const existphone = await userModel.findOne({ phone: phone });
+//         if (existphone) {
+//             return res.status(400).send({ status: false, message: "This phone is already in use, try with another one." });
+//         }
+
+//         //====validations for password====
+//         if (password && typeof password != "string") {
+//             return res.status(400).send({ status: false, message: "Password must be in string" });
+//         }
+//         if (!password || !password.trim()) {
+//             return res.status(400).send({ status: false, message: "password is required." });
+//         }
+//         if (!validatePassword(password.trim())) {
+//             return res.status(400).send({ status: false, message: "Password Must be 8-15 length,consist of mixed character and special character" });
+//         }
+//         // const saltRounds = 10;
+//         // bcrypt.hash(password, saltRounds, function (err, hash) {
+//         //     body.password = hash;
+//         // });
+//         let hashing = bcrypt.hashSync(password, 10);
+//         body.password = hashing;
+
+
+//         //====validations for address====
+//         // if (!address) {
+//         //     return res.status(400).send({ status: false, message: "Address is required." });
+//         // }
+
+
+//         //address = JSON.parse(body.address);
+//         if (address && typeof address != "object") {
+//             return res.status(400).send({ status: false, message: "Address must be in Object Form." });
+//         }
+
+//         //body.address = JSON.parse(body.address);
+//         //address=body.address
+//         if(address){
+//         let { shipping, billing } = address;
+//         //====validations for shipping address====
+//         if (shipping && typeof shipping != "object") {
+//             return res.status(400).send({ status: false, message: "Shipping Address must be in Object Form." });
+//         }
+//         if (!shipping) {
+//             return res.status(400).send({ status: false, message: "Shipping Adderss is required." });
+//         }
+//         if (shipping.street && typeof shipping.street != "string") {
+//             return res.status(400).send({ status: false, message: "shipping Street must be in string" });
+//         }
+//         if (!shipping.street || !shipping.street.trim()) {
+//             return res.status(400).send({ status: false, message: "shipping Street is required." });
+//         }
+//         if (shipping.city && typeof shipping.city != "string") {
+//             return res.status(400).send({ status: false, message: "shipping City must be in string" });
+//         }
+//         if (!shipping.city || !shipping.city.trim()) {
+//             return res.status(400).send({ status: false, message: "shipping City is required." });
+//         }
+//         if (!validatePlace(shipping.city.trim())) {
+//             return res.status(400).send({ status: false, message: "shipping City is invalid, number is not allowed." });
+//         }
+//         if (shipping.pincode && typeof shipping.pincode != "string") {
+//             return res.status(400).send({ status: false, message: "shipping Pincode must be in string" });
+//         }
+//         if (!shipping.pincode || !shipping.pincode.trim()) {
+//             return res.status(400).send({ status: false, message: "shipping Pincode is required." });
+//         }
+//         if (!validatePincode(shipping.pincode.trim())) {
+//             return res.status(400).send({ status: false, message: "shipping pincode is invalid, it contains only 6 digits." });
+//         }
+
+//         //====validations for Billing address====
+//         if (billing && typeof billing != "object") {
+//             return res.status(400).send({ status: false, message: "Billing Address must be in Object Form." });
+//         }
+//         if (!billing) {
+//             return res.status(400).send({ status: false, message: "Billing Adderss is required." });
+//         }
+//         if (billing.street && typeof billing.street != "string") {
+//             return res.status(400).send({ status: false, message: "Billing Street must be in string" });
+//         }
+//         if (!billing.street || !billing.street.trim()) {
+//             return res.status(400).send({ status: false, message: "Billing Street is required." });
+//         }
+//         if (billing.city && typeof billing.city != "string") {
+//             return res.status(400).send({ status: false, message: "Billing City must be in string" });
+//         }
+//         if (!billing.city || !billing.city.trim()) {
+//             return res.status(400).send({ status: false, message: "Billing City is required." });
+//         }
+//         if (!validatePlace(billing.city.trim())) {
+//             return res.status(400).send({ status: false, message: "Billing City is invalid, number is not allowed." });
+//         }
+//         if (billing.pincode && typeof billing.pincode != "string") {
+//             return res.status(400).send({ status: false, message: "Billing Pincode must be in string" });
+//         }
+//         if (!billing.pincode || !billing.pincode.trim()) {
+//             return res.status(400).send({ status: false, message: "Billing Pincode is required." });
+//         }
+//         if (!validatePincode(billing.pincode.trim())) {
+//             return res.status(400).send({ status: false, message: "Billing pincode is invalid, it contains only 6 digits." });
+//         }
+//       }
+//         body.profileImage = req.profileImage;
+//         const registerUser = await userModel.create(body);
+
+//         res.status(201).send({ status: true, message: "User created successfully", data: registerUser });
+//     // } catch (err) {
+//     //     return res.status(500).send({ status: false, message: err.message });
+//     // }
+// }
+
+
+
 const registerUser = async function (req, res) {
-    try {
-        let body = req.body;
+  try {
+      let body = req.body;
 
-        if (body.address) {
-            body.address = JSON.parse(body.address);
-        }
+      // if (body.address) {
+      //     body.address = JSON.parse(body.address);
+      // }
 
-        let { fname, lname, email, phone, password, address, profileImage } = body;
-
-        if (Object.keys(body).length == 0) {
-            return res.status(400).send({ status: false, message: "Request body can't be empty." });
-        }
-
-        //====validations for First name====
-        if (fname && typeof fname != "string") {
-            return res.status(400).send({ status: false, message: "First name must be in string" });
-        }
-        if (!fname || !fname.trim()) {
-            return res.status(400).send({ status: false, message: "First name is required." });
-        }
-        if (!validateName(fname.trim())) {
-            return res.status(400).send({ status: false, message: "Enter a valid First name" });
-        }
-
-        //====validations for last name====
-        if (lname && typeof lname != "string") {
-            return res.status(400).send({ status: false, message: "Last name must be in string" });
-        }
-        if (!lname || !lname.trim()) {
-            return res.status(400).send({ status: false, message: "Last name is required." });
-        }
-        if (!validateName(lname.trim())) {
-            return res.status(400).send({ status: false, message: "Enter a valid Last name." });
-        }
-
-        //====validations for Email====
-        if (email && typeof email != "string") {
-            return res.status(400).send({ status: false, message: "Email must be in String." });
-        }
-        if (!email || !email.trim()) {
-            return res.status(400).send({ status: false, message: "Email is required." });
-        }
-        if (!validateEmail(email.trim())) {
-            return res.status(400).send({ status: false, message: "Enter a valid Email." });
-        }
-        const existEmail = await userModel.findOne({ email: email });
-        if (existEmail) {
-            return res.status(400).send({ status: false, message: "This Email is already in use, try with another one." });
-        }
-
-        //====validations for Phone====
-        if (phone && typeof phone != "string") {
-            return res.status(400).send({ status: false, message: "phone number must be in String." });
-        }
-        if (!phone || !phone.trim()) {
-            return res.status(400).send({ status: false, message: "phone number is required." });
-        }
-        if (!validateMobileNo(phone.trim())) {
-            return res.status(400).send({ status: false, message: "Enter a valid phone Number." });
-        }
-        const existphone = await userModel.findOne({ phone: phone });
-        if (existphone) {
-            return res.status(400).send({ status: false, message: "This phone is already in use, try with another one." });
-        }
-
-        //====validations for password====
-        if (password && typeof password != "string") {
-            return res.status(400).send({ status: false, message: "Password must be in string" });
-        }
-        if (!password || !password.trim()) {
-            return res.status(400).send({ status: false, message: "password is required." });
-        }
-        if (!validatePassword(password.trim())) {
-            return res.status(400).send({ status: false, message: "Password Must be 8-15 length,consist of mixed character and special character" });
-        }
-        // const saltRounds = 10;
-        // bcrypt.hash(password, saltRounds, function (err, hash) {
-        //     body.password = hash;
-        // });
-        let hashing = bcrypt.hashSync(password, 10);
-        body.password = hashing;
-
-
-        //====validations for address====
-        if (!address) {
-            return res.status(400).send({ status: false, message: "Address is required." });
-        }
-
-        // address = JSON.parse(body.address);
-        if (address && typeof address != "object") {
+      if (body.address) {
+        if(body.address[0]!='{'){
             return res.status(400).send({ status: false, message: "Address must be in Object Form." });
         }
-        let { shipping, billing } = address;
-        //====validations for shipping address====
-        if (shipping && typeof shipping != "object") {
-            return res.status(400).send({ status: false, message: "Shipping Address must be in Object Form." });
-        }
-        if (!shipping) {
-            return res.status(400).send({ status: false, message: "Shipping Adderss is required." });
-        }
-        if (shipping.street && typeof shipping.street != "string") {
-            return res.status(400).send({ status: false, message: "shipping Street must be in string" });
-        }
-        if (!shipping.street || !shipping.street.trim()) {
-            return res.status(400).send({ status: false, message: "shipping Street is required." });
-        }
-        if (shipping.city && typeof shipping.city != "string") {
-            return res.status(400).send({ status: false, message: "shipping City must be in string" });
-        }
-        if (!shipping.city || !shipping.city.trim()) {
-            return res.status(400).send({ status: false, message: "shipping City is required." });
-        }
-        if (!validatePlace(shipping.city.trim())) {
-            return res.status(400).send({ status: false, message: "shipping City is invalid, number is not allowed." });
-        }
-        if (shipping.pincode && typeof shipping.pincode != "string") {
-            return res.status(400).send({ status: false, message: "shipping Pincode must be in string" });
-        }
-        if (!shipping.pincode || !shipping.pincode.trim()) {
-            return res.status(400).send({ status: false, message: "shipping Pincode is required." });
-        }
-        if (!validatePincode(shipping.pincode.trim())) {
-            return res.status(400).send({ status: false, message: "shipping pincode is invalid, it contains only 6 digits." });
-        }
-
-        //====validations for Billing address====
-        if (billing && typeof billing != "object") {
-            return res.status(400).send({ status: false, message: "Billing Address must be in Object Form." });
-        }
-        if (!billing) {
-            return res.status(400).send({ status: false, message: "Billing Adderss is required." });
-        }
-        if (billing.street && typeof billing.street != "string") {
-            return res.status(400).send({ status: false, message: "Billing Street must be in string" });
-        }
-        if (!billing.street || !billing.street.trim()) {
-            return res.status(400).send({ status: false, message: "Billing Street is required." });
-        }
-        if (billing.city && typeof billing.city != "string") {
-            return res.status(400).send({ status: false, message: "Billing City must be in string" });
-        }
-        if (!billing.city || !billing.city.trim()) {
-            return res.status(400).send({ status: false, message: "Billing City is required." });
-        }
-        if (!validatePlace(billing.city.trim())) {
-            return res.status(400).send({ status: false, message: "Billing City is invalid, number is not allowed." });
-        }
-        if (billing.pincode && typeof billing.pincode != "string") {
-            return res.status(400).send({ status: false, message: "Billing Pincode must be in string" });
-        }
-        if (!billing.pincode || !billing.pincode.trim()) {
-            return res.status(400).send({ status: false, message: "Billing Pincode is required." });
-        }
-        if (!validatePincode(billing.pincode.trim())) {
-            return res.status(400).send({ status: false, message: "Billing pincode is invalid, it contains only 6 digits." });
-        }
-
-        body.profileImage = req.profileImage;
-        const registerUser = await userModel.create(body);
-
-        res.status(201).send({ status: true, message: "User created successfully", data: registerUser });
-    } catch (err) {
-        return res.status(500).send({ status: false, message: err.message });
+        body.address = JSON.parse(body.address);
     }
+
+    let dataInBody = Object.keys(body);
+    let arr = ["fname", "lname", "email", "phone", "password", "address", "profileImage"];
+
+    for (let i = 0; i < dataInBody.length; i++) {
+        let someThing = dataInBody[i];
+        if (!arr.includes(someThing)) {
+            return res.status(400).send({ status: false, message: `${someThing} is not a valid Property.` });
+        }
+    }
+
+      let { fname, lname, email, phone, password, address, profileImage } = body;
+
+      if (Object.keys(body).length == 0) {
+          return res.status(400).send({ status: false, message: "Request body can't be empty." });
+      }
+
+      //====validations for First name====
+      if (fname && typeof fname != "string") {
+          return res.status(400).send({ status: false, message: "First name must be in string" });
+      }
+      if (!fname || !fname.trim()) {
+          return res.status(400).send({ status: false, message: "First name is required." });
+      }
+      if (!validateName(fname.trim())) {
+          return res.status(400).send({ status: false, message: "Enter a valid First name" });
+      }
+
+      //====validations for last name====
+      if (lname && typeof lname != "string") {
+          return res.status(400).send({ status: false, message: "Last name must be in string" });
+      }
+      if (!lname || !lname.trim()) {
+          return res.status(400).send({ status: false, message: "Last name is required." });
+      }
+      if (!validateName(lname.trim())) {
+          return res.status(400).send({ status: false, message: "Enter a valid Last name." });
+      }
+
+      //====validations for Email====
+      if (email && typeof email != "string") {
+          return res.status(400).send({ status: false, message: "Email must be in String." });
+      }
+      if (!email || !email.trim()) {
+          return res.status(400).send({ status: false, message: "Email is required." });
+      }
+      if (!validateEmail(email.trim())) {
+          return res.status(400).send({ status: false, message: "Enter a valid Email." });
+      }
+      const existEmail = await userModel.findOne({ email: email });
+      if (existEmail) {
+          return res.status(400).send({ status: false, message: "This Email is already in use, try with another one." });
+      }
+
+      //====validations for Phone====
+      if (phone && typeof phone != "string") {
+          return res.status(400).send({ status: false, message: "phone number must be in String." });
+      }
+      if (!phone || !phone.trim()) {
+          return res.status(400).send({ status: false, message: "phone number is required." });
+      }
+      if (!validateMobileNo(phone.trim())) {
+          return res.status(400).send({ status: false, message: "Enter a valid phone Number." });
+      }
+      const existphone = await userModel.findOne({ phone: phone });
+      if (existphone) {
+          return res.status(400).send({ status: false, message: "This phone is already in use, try with another one." });
+      }
+
+      //====validations for password====
+      if (password && typeof password != "string") {
+          return res.status(400).send({ status: false, message: "Password must be in string" });
+      }
+      if (!password || !password.trim()) {
+          return res.status(400).send({ status: false, message: "password is required." });
+      }
+      if (!validatePassword(password.trim())) {
+          return res.status(400).send({ status: false, message: "Password Must be 8-15 length,consist of mixed character and special character" });
+      }
+      // const saltRounds = 10;
+      // bcrypt.hash(password, saltRounds, function (err, hash) {
+      //     body.password = hash;
+      // });
+      let hashing = bcrypt.hashSync(password, 10);
+      body.password = hashing;
+
+
+      //====validations for address====
+      if (!address) {
+          return res.status(400).send({ status: false, message: "Address is required." });
+      }
+
+      // address = JSON.parse(body.address);
+      if (address && typeof address != "object") {
+          return res.status(400).send({ status: false, message: "Address must be in Object Form." });
+      }
+      let { shipping, billing } = address;
+      //====validations for shipping address====
+      if (shipping && typeof shipping != "object") {
+          return res.status(400).send({ status: false, message: "Shipping Address must be in Object Form." });
+      }
+      if (!shipping) {
+          return res.status(400).send({ status: false, message: "Shipping Adderss is required." });
+      }
+      if (shipping.street && typeof shipping.street != "string") {
+          return res.status(400).send({ status: false, message: "shipping Street must be in string" });
+      }
+      if (!shipping.street || !shipping.street.trim()) {
+          return res.status(400).send({ status: false, message: "shipping Street is required." });
+      }
+      if (shipping.city && typeof shipping.city != "string") {
+          return res.status(400).send({ status: false, message: "shipping City must be in string" });
+      }
+      if (!shipping.city || !shipping.city.trim()) {
+          return res.status(400).send({ status: false, message: "shipping City is required." });
+      }
+      if (!validatePlace(shipping.city.trim())) {
+          return res.status(400).send({ status: false, message: "shipping City is invalid, number is not allowed." });
+      }
+      if (shipping.pincode && typeof shipping.pincode != "string") {
+          return res.status(400).send({ status: false, message: "shipping Pincode must be in string" });
+      }
+      if (!shipping.pincode || !shipping.pincode.trim()) {
+          return res.status(400).send({ status: false, message: "shipping Pincode is required." });
+      }
+      if (!validatePincode(shipping.pincode.trim())) {
+          return res.status(400).send({ status: false, message: "shipping pincode is invalid, it contains only 6 digits." });
+      }
+
+      //====validations for Billing address====
+      if (billing && typeof billing != "object") {
+          return res.status(400).send({ status: false, message: "Billing Address must be in Object Form." });
+      }
+      if (!billing) {
+          return res.status(400).send({ status: false, message: "Billing Adderss is required." });
+      }
+      if (billing.street && typeof billing.street != "string") {
+          return res.status(400).send({ status: false, message: "Billing Street must be in string" });
+      }
+      if (!billing.street || !billing.street.trim()) {
+          return res.status(400).send({ status: false, message: "Billing Street is required." });
+      }
+      if (billing.city && typeof billing.city != "string") {
+          return res.status(400).send({ status: false, message: "Billing City must be in string" });
+      }
+      if (!billing.city || !billing.city.trim()) {
+          return res.status(400).send({ status: false, message: "Billing City is required." });
+      }
+      if (!validatePlace(billing.city.trim())) {
+          return res.status(400).send({ status: false, message: "Billing City is invalid, number is not allowed." });
+      }
+      if (billing.pincode && typeof billing.pincode != "string") {
+          return res.status(400).send({ status: false, message: "Billing Pincode must be in string" });
+      }
+      if (!billing.pincode || !billing.pincode.trim()) {
+          return res.status(400).send({ status: false, message: "Billing Pincode is required." });
+      }
+      if (!validatePincode(billing.pincode.trim())) {
+          return res.status(400).send({ status: false, message: "Billing pincode is invalid, it contains only 6 digits." });
+      }
+
+      body.profileImage = req.profileImage;
+      const registerUser = await userModel.create(body);
+      let { __v, ...otherData} = registerUser._doc
+     
+
+      res.status(201).send({ status: true, message: "User created successfully", data: otherData });
+  } catch (err) {
+      return res.status(500).send({ status: false, message: err.message });
+  }
 }
 
 
@@ -190,6 +406,9 @@ const getUser = async function (req, res) {
         }
 
         //------------------------userId matches from the token for authorization purpose-------------------------------//
+        if (userId != req.token) {
+          return res.status(403).send({ status: false, message: "You are not authorize to update." });
+      }
         //if(userId !== token_UserId){ return res.status(403).send({ status:false, message:"you are not authorized user"})}
         const getData = await userModel.findById({ _id: userId });
         if (!getData) { return res.status(404).send({ status: false, message: "User Id is not present in DataBase" }) }
@@ -197,7 +416,7 @@ const getUser = async function (req, res) {
         return res.status(200).send({ status: true, message: "User profile details", data: getData })
 
     } catch (error) {
-        return res.status(500).send({ status: false, Message: error.Message })
+        return res.status(500).send({ status: false, message: error.message, type:error.type})
     }
 
 }
@@ -225,7 +444,27 @@ const updateUsers = async (req, res) => {
         }
 
         let data = req.body
+        let files = req.files
+        if ((files) && (files.length > 0)) {
 
+          let uploadFileURL = await uploadFile(files[0])
+          data.profileImage = uploadFileURL
+
+      }
+        if(Object.keys(data).length == 0){ return res.status(400).send({status:false, message: "please provide some attribute to update..."})}
+        let dataInBody = Object.keys(data);
+        let arr = ["fname", "lname", "email", "phone", "password", "address", "profileImage"];
+    
+       
+
+
+
+        for (let i = 0; i < dataInBody.length; i++) {
+            let someThing = dataInBody[i];
+            if (!arr.includes(someThing)) {
+                return res.status(400).send({ status: false, message: `${someThing} is not a valid Property.` });
+            }
+        }
         let { fname, lname, email, password, phone, profileImage, address } = data
 
 
@@ -289,14 +528,14 @@ const updateUsers = async (req, res) => {
             data.password = hashing;
         }
 
-        let files = req.files
+        // let files = req.files
 
-        if ((files) && (files.length > 0)) {
+        // if ((files) && (files.length > 0)) {
 
-            let uploadFileURL = await uploadFile(files[0])
-            data.profileImage = uploadFileURL
+        //     let uploadFileURL = await uploadFile(files[0])
+        //     data.profileImage = uploadFileURL
 
-        }
+        // }
 
         if (address) {
             address = JSON.parse(data.address)
@@ -464,7 +703,7 @@ const login = async function (req, res) {
         }
 
         const token = jwt.sign(
-            { userId: check._id.toString() }, "NKTCGROUPTHREEPROJECTFIVE", { expiresIn: "10m" }
+            { userId: check._id.toString() }, "NKTCGROUPTHREEPROJECTFIVE", { expiresIn: "10h" }
         );
         return res.status(200).send({ status: true, message: "User Login Successfull", data: { userId: check._id, token: token } });
     }

@@ -41,6 +41,9 @@ let uploadfiles = async (req, res, next) => {
 
     } else {
         //console.log(req.files[0])
+        if(Object.keys(req.body).length == 0) {
+            return res.status(400).send({ status: false, message: "Body can't be empty..." });
+        }
         res.status(400).send({ status: false, message: "please enter Image document." });
     }
 

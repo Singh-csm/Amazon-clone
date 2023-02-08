@@ -119,7 +119,7 @@ const createCart = async function (req, res) {
             x.push(obj)
 
         }
-        x.push()
+        
 
         console.log(x)
         let updateCart = await cartModel.findOneAndUpdate({ userId: userId }, { items: x, totalPrice: totalPrices, totalItems: x.length }, { new: true })
@@ -301,8 +301,8 @@ const deleteCart = async (req, res) => {
         if (!isUserExist) {
             return res.status(404).send({ status: false, message: "no card exist in db with given userId..." })
         }
-        let deletedCart = await cartModel.findOneAndUpdate({ userId: userId, isDeleted: false }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true })
-        res.status(204).send()
+        let deletedCart = await cartModel.findOneAndUpdate({ userId: userId, isDeleted: false }, { items: [], totalItems: 0, totalPrice: 0 }, { new: true }).select({__v:0})
+        res.status(204).send({status: true, message: "Data Deleted", data:deletedCart })
     }
     catch (err) {
         res.status(500).send({ status: false, err: err.message })
