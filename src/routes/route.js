@@ -4,6 +4,7 @@ const router = express.Router();
 const { registerUser, getUser, updateUsers, login } = require('../controller/userController');
 const { createProduct, getProducts, fetchProductsById, deleteProductById, updateProducts } = require("../controller/productController");
 const { createCart, updatecart, getCartDetails, deleteCart } = require("../controller/cartController");
+const { placeOrder, updatedOrder } = require("../controller/orderController");
 const { uploadfiles } = require("../middleware/aws");
 const { isAuthentication } = require("../middleware/commonMiddleware");
 
@@ -24,5 +25,8 @@ router.post('/users/:userId/cart', isAuthentication, createCart);
 router.get("/users/:userId/cart", isAuthentication, getCartDetails);
 router.put("/users/:userId/cart", isAuthentication, updatecart);
 router.delete("/users/:userId/cart", isAuthentication, deleteCart);
+//======APIs for Order========
+router.post('/users/:userId/orders', placeOrder);
+router.put('/users/:userId/orders', updatedOrder);
 
 module.exports = router

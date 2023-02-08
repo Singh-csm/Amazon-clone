@@ -73,7 +73,7 @@ const createCart = async function (req, res) {
 
 
             let creatNewCart = await cartModel.create(newCart)
-            let iscreatNewCart = await cartModel.findOne({ _id: creatNewCart._id }).lean()
+            let iscreatNewCart = await cartModel.findOne({ _id: creatNewCart._id }).lean().select({__v:0})
             // iscreatNewCart={userId,items,totalPrice,totalItems}
             let arr = []
             iscreatNewCart["items"].forEach((x) => {
