@@ -191,7 +191,7 @@ const fetchProductsById = async function (req, res) {
             return res.status(400).send({ status: false, message: "No user found with this Id or might be deleted." });
         }
 
-        res.status(201).send({ status: true, message: "Success", data: getProductsById });
+        res.status(200).send({ status: true, message: "Success", data: getProductsById });
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
     }
