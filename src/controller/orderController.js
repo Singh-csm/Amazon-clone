@@ -35,7 +35,7 @@ const placeOrder = async function (req, res) {
     }
     const checkCart = await cartModel.findOne({ _id: cartId, userId: userId });
     if (!checkCart) {
-        return res.status(400).send({ status: false, message: "Cart not found, please check your user id and cart id." });
+        return res.status(404).send({ status: false, message: "Cart not found, please check your user id and cart id." });
     }
     if (checkCart.items.length == 0) {
         return res.status(404).send({ status: false, message: "Please add products in cart to place order." });
@@ -53,22 +53,28 @@ const placeOrder = async function (req, res) {
         totalItems: checkCart.totalItems,
         totalQuantity: totalQuantity
     }
-    
-        await cartModel.findOneAndUpdate(
-            { userId: userId },
-            { $set: { items: [], totalItems: 0, totalPrice: 0 }} ,{new:true}
-        );
-       
-        // orderDetails.isDeleted=true
-        // orderDetails.deletedAt=Date.now()
-        // let createOrder = await orderModel.create(orderDetails);
-       
-        // return res.status(201).send({ status: true, message: "order canceled successfully ", data: createOrder });
-    
+
     let createOrder = await orderModel.create(orderDetails);
     createOrder = createOrder._doc;
+
     delete createOrder.isDeleted;
-    return res.status(201).send({ status: true, message: "Success", data: createOrder });
+    delete createOrder.__v;
+
+    await cartModel.findOneAndUpdate(
+        { userId: userId },
+        { $set: { items: [], totalItems: 0, totalPrice: 0 }} ,{new:true}
+    );
+   
+    let item1=createOrder['items']
+    let y=[]
+    item1.forEach((x)=>{
+        let z={productId:x.productId, quantity:x.quantity}
+        y.push(z)
+    })
+    console.log(y)
+   createOrder['items']=y
+
+        return res.status(201).send({ status: true, message: "Success", data: createOrder });
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
     }
@@ -87,12 +93,11 @@ const updatedOrder = async (req, res) => {
             if (!validatorArr.includes(x)) {
                 count++
             }
-
         })
+
         if (count > 0) {
             return res.status(400).send({ status: false, message: "please provide valid attributes in order to update your order...." })
         }
-
 
         if (userId == undefined || (userId && userId.trim() == "")) {
             return res.status(400).send({ status: false, message: "please provide user Id...." })
@@ -140,14 +145,23 @@ const updatedOrder = async (req, res) => {
                 { new: true }
             ).select({ __v: 0 });
 
-            return res.status(200).send({ status: true, message: "order cancelled successfully", data: updatedOrder })
+                return res.status(200).send({ status: true, message: "order cancelled successfully", data: updatedOrder })
         }
         let updatedOrder = await orderModel.findOneAndUpdate(
             { _id: orderId, userId: userId, isDeleted: false },
             { status: data.status },
             { new: true }
-        ).select({ __v: 0 });
+        ).select({ __v: 0 }).lean()
         updatedOrder.isDeleted = undefined;
+
+        let item1=updatedOrder['items']
+        let y=[]
+        item1.forEach((x)=>{
+            let z={productId:x.productId, quantity:x.quantity}
+            y.push(z)
+        })
+        console.log(y)
+        updatedOrder['items']=y
         return res.status(200).send({ status: true, message: "order updated successfully", data: updatedOrder })
     }
     catch (err) {

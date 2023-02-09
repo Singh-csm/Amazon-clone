@@ -35,12 +35,12 @@ let uploadfiles = async (req, res, next) => {
     let files = req.files
     if (req.files && req.files.length > 0) {
         let x = await uploadFile(files[0])
-        // console.log(x)
+     
         req.profileImage = x
         next()
 
     } else {
-        //console.log(req.files[0])
+  
         if(Object.keys(req.body).length == 0) {
             return res.status(400).send({ status: false, message: "Body can't be empty..." });
         }

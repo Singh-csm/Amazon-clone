@@ -10,10 +10,6 @@ let createProduct = async function (req, res) {
 
         let data = req.body;
 
-        // if (Object.keys(data).length == 0 ) {
-        //     return res.status(400).send({ status: false, message: "Request body can't be Empty!" });  //check whether you middleware is not ?
-        // }
-
         //if keys were undefined then in case:
         let dataInBody = Object.keys(data);
         let arr = ["title", "description", "price", "currencyId", "currencyFormat", "uploadFile", "isFreeShipping", "style", "availableSizes", "installments", "productImage"];
@@ -26,7 +22,6 @@ let createProduct = async function (req, res) {
         }
 
 
-
         let { title, description, price, currencyId, currencyFormat, uploadFile, isFreeShipping, style, availableSizes, installments } = data;
 
         //validation ...
@@ -34,14 +29,11 @@ let createProduct = async function (req, res) {
         if (!isValidString(title)) { return res.status(400).send({ status: false, message: "Enter valid title." }) }
         title = title.toLowerCase()
 
-
-        const Check_Title = await productModel.findOne({ title: title })
+        const Check_Title = await productModel.findOne({ title: title , isDeleted:false})
         if (Check_Title) { return res.status(404).send({ status: false, message: "title already exists. Please enter unique title." }) }
 
         if (!description) return res.status(400).send({ status: false, message: "description is mandatory." })
         if (!isValidString(description)) { return res.status(400).send({ status: false, message: "Enter some description.." }) }
-
-
 
         if (!price) return res.status(400).send({ status: false, message: "price is mandatory." })
         let Price = Number(price);
@@ -80,14 +72,14 @@ let createProduct = async function (req, res) {
 
         let arr1 = ["S", "XS", "M", "X", "L", "XXL", "XL"];
         let empArr = [];
-        if (availableSizes.length != 0) {//string
-            let availableSize = availableSizes.split(",");//array
-            availableSize.forEach((x) => {//going in its values
-                if (!arr1.includes(x)) {//availablesize=
+        if (availableSizes.length != 0) {       //string
+            let availableSize = availableSizes.split(",");      //array
+            availableSize.forEach((x) => {      //going in its values
+                if (!arr1.includes(x)) {        //availablesize=
                     empArr.push(x);//
 
                 }
-                //1ST S check [arr1]==1 or [arr1]==0
+    //1ST S check [arr1]==1 or [arr1]==0
             })
             if (empArr.length > 0) {
                 return res.status(400).send({ status: false, message: "availableSizes can only be S, XS, M, X, L, XXL, XL " })
@@ -95,15 +87,12 @@ let createProduct = async function (req, res) {
         }
 
         data.productImage = req.profileImage;
-        // availableSizes = availableSizes.trim()
         data.availableSizes = availableSizes.split(",");
-        // data.availableSizes = availableSizes.split(',').map((x) => x.trim())
         let create_Data = await productModel.create(data);
 
         if (!create_Data) {
             return res.status(400).send({ status: false, message: "Data could not be created." });
         }
-
         return res.status(201).send({ status: true, message: "Success", data: create_Data })
 
     } catch (error) {
@@ -126,7 +115,6 @@ const getProducts = async function (req, res) {
         if (name) {
             name = name.toLowerCase();
             obj["title"] = { $regex: name }
-
         }
 
         if (priceGreaterThan) {
@@ -159,7 +147,7 @@ const getProducts = async function (req, res) {
             return res.status(400).send({ status: false, message: "please enter vaild filters to fetch data....." });
         }
 
-        let products = await productModel.find(obj);
+        let products = await productModel.find(obj).select({__v:0});
 
         //by doing bd call bring the documents according to filter and then sort
         if (!priceSort) priceSort = 1 // if sort is not given then  am sorting in asc order
@@ -177,7 +165,7 @@ const getProducts = async function (req, res) {
             return res.status(404).send({ status: false, message: "no products found" });
         }
         else {
-            return res.status(200).send({ status: false, message: "products details", data: products });
+            return res.status(200).send({ status: true, message: "products details", data: products });
         }
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });
@@ -198,12 +186,12 @@ const fetchProductsById = async function (req, res) {
             return res.status(400).send({ status: false, message: "Product Id is invalid , please enter a valid ID." });
         }
 
-        const getProductsById = await productModel.findOne({ _id: productId, isDeleted: false });
+        const getProductsById = await productModel.findOne({ _id: productId, isDeleted: false }).select({__v:0});
         if (!getProductsById) {
             return res.status(400).send({ status: false, message: "No user found with this Id or might be deleted." });
         }
 
-        res.status(201).send({ status: false, message: "Success", data: getProductsById });
+        res.status(201).send({ status: true, message: "Success", data: getProductsById });
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
     }
@@ -294,14 +282,14 @@ const updateProducts = async function (req, res) {
         if (availableSizes) {
             let arr1 = ["S", "XS", "M", "X", "L", "XXL", "XL"];
             let empArr = [];
-            if (availableSizes.length > 0) {//string
-                let availableSize = availableSizes.split(",");//array
-                availableSize.forEach((x) => {//going in its values
-                    if ((x == undefined) || (!arr1.includes(x))) {//availablesize=
+            if (availableSizes.length > 0) {    //string
+                let availableSize = availableSizes.split(",");  //array
+                availableSize.forEach((x) => {  //going in its values
+                    if ((x == undefined) || (!arr1.includes(x))) {  //availablesize=
                         empArr.push(x);//
 
                     }
-                    //1ST S check [arr1]==1 or [arr1]==0 
+     //1ST S check [arr1]==1 or [arr1]==0 
                 })
                 if (empArr.length > 0) {
                     return res.status(400).send({ status: false, message: "availableSizes can only be S, XS, M, X, L, XXL, XL " });
@@ -309,7 +297,6 @@ const updateProducts = async function (req, res) {
             }
             data.availableSizes = availableSizes.split(',');
         }
-
 
         let files = req.files;
         if ((files) && (files.length > 0)) {
@@ -331,7 +318,7 @@ const updateProducts = async function (req, res) {
             { isDeleted: false, _id: productId },
             data,
             { new: true }
-        );
+        ).select({__v:0});
 
         if (!updateProduct) {
             return res.status(404).send({ status: false, message: "Product is not found or Already Deleted!" });
